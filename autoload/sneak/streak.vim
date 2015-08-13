@@ -114,7 +114,7 @@ func! s:after()
   "remove temporary highlight links
   exec 'hi! link Conceal '.s:orig_hl_conceal
   exec 'hi! link SneakPluginTarget '.s:orig_hl_sneaktarget
-  call s:restore_statusline()
+  " call s:restore_statusline()
   let &synmaxcol=s:synmaxcol_orig
   silent! let &syntax=s:syntax_orig
   let &concealcursor=s:cc_orig
@@ -163,7 +163,7 @@ func! s:before()
   hi! link SneakPluginTarget SneakStreakMask
 
   call s:disable_conceal_in_other_windows()
-  call s:decorate_statusline()
+  " call s:decorate_statusline()
 
   augroup sneak_streak_cleanup
     autocmd!
