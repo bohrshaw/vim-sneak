@@ -117,6 +117,7 @@ endf
 func! s:disable_conceal_in_other_windows()
   for w in range(1, winnr('$'))
     if 'help' !=# getwinvar(w, '&buftype') && w != winnr()
+        \ && empty(getbufvar(winbufnr(w), 'dirvish'))
       call setwinvar(w, 'sneak_orig_cl', getwinvar(w, '&conceallevel'))
       call setwinvar(w, '&conceallevel', 0)
     endif
@@ -125,6 +126,7 @@ endf
 func! s:restore_conceal_in_other_windows()
   for w in range(1, winnr('$'))
     if 'help' !=# getwinvar(w, '&buftype') && w != winnr()
+        \ && empty(getbufvar(winbufnr(w), 'dirvish'))
       call setwinvar(w, '&conceallevel', getwinvar(w, 'sneak_orig_cl'))
     endif
   endfor
@@ -137,7 +139,7 @@ func! s:before()
   ownsyntax sneak_label
 
   " highlight the cursor location (else the cursor is not visible during getchar())
-  let w:sneak_cursor_hl = matchadd("SneakCursor", '\%#', 11, -1)
+  let w:sneak_cursor_hl = matchadd("Cursor", '\%#', 11, -1)
 
   let s:cc_orig=&l:concealcursor | setlocal concealcursor=ncv
   let s:cl_orig=&l:conceallevel  | setlocal conceallevel=2
