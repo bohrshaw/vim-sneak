@@ -62,6 +62,9 @@ func! s:do_label(s, v, reverse) "{{{
 
   if choice == "\<Tab>" && overflow[0] > 0 "overflow => decorate next N matches
     call cursor(overflow[0], overflow[1])
+  elseif "\<Esc>" == choice
+    call feedkeys("\<C-o>")
+    return ''
   elseif (strlen(g:sneak#opt.label_esc) && choice ==# g:sneak#opt.label_esc)
         \ || -1 != index(["\<Esc>", "\<C-c>"], choice)
     return "\<Esc>" "exit label-mode.
