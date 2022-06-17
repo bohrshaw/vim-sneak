@@ -109,7 +109,7 @@ func! s:do_label(s, v, reverse, label) abort "{{{
     if (!a:reverse && choice ==# "\<Tab>") || (a:reverse && choice =~# "^\<S-Tab>\\|\<BS>$")
       call cursor(overflow[0], overflow[1])
     endif  " ...else we just switched directions, do not overflow.
-  elseif "\<Esc>" == choice
+  elseif choice == "\<Esc>"
     call feedkeys("\<C-o>")
     return ''
   elseif (strlen(g:sneak#opt.label_esc) && choice ==# g:sneak#opt.label_esc)
