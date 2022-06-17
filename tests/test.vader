@@ -1,5 +1,4 @@
 # vim -N -u NONE -c "set rtp+=~/.vim/bundle/vim-sneak,~/.vim/bundle/vader.vim,~/.vim/bundle/vim-repeat" -c "runtime! plugin/sneak.vim plugin/vader.vim plugin/repeat.vim" -c "Vader ~/.vim/bundle/vim-sneak/tests/test.vader"
-# vim -N -u NONE -c 'set rtp+=~/.vim/bundle/vim-sneak,~/.vim/bundle/vader.vim,~/.vim/bundle/vim-repeat' -c 'runtime! plugin/sneak.vim plugin/vader.vim plugin/repeat.vim' -c 'Vader ~/.vim/bundle/vim-sneak/tests/test.vader'
 #
 # BUG: highlight targets are bogus if &iminsert=1
 # BUG: sneak cannot find ёе: in this text
@@ -36,7 +35,6 @@ Execute (Clean up test environment):
 ###########################################################
 Execute (autoloaded functions should not exist):
   Assert !exists("*sneak#label#to")
-  Assert !exists("*sneak#hl#removehl")
   Assert !exists("*sneak#search#new")
   Assert !exists("*sneak#util#strlen")
 
@@ -60,22 +58,11 @@ Execute ('label' functions should not exist after vanilla-sneak):
 
 Execute (hl#links_to() returns linked-to highlight group):
   hi! link Conceal SneakConceal
-  Assert 'SneakConceal' ==# sneak#hl#links_to('Conceal')
+  Assert 'SneakConceal' ==# sneak#util#links_to('Conceal')
 
 Execute (hl#links_to() returns NONE if not linked):
   hi! link Conceal NONE
-  Assert "NONE" ==# sneak#hl#links_to('Conceal')
-
-Execute (hl#get() handles non-existent hl group):
-  Assert '' == sneak#hl#get('Derp')
-
-Execute (hl#get() returns text definition of highlight group):
-  hi Cursor guifg=white guibg=#0a9dff ctermfg=16 ctermbg=253
-  Assert match(sneak#hl#get('Cursor'), '\Vctermbg=253')
-
-Execute (hl#get() returns empty if highlight group is 'cleared'):
-  hi clear Cursor
-  Assert "" == sneak#hl#get('Cursor')
+  Assert "NONE" ==# sneak#util#links_to('Conceal')
 
 Execute (sneak#is_sneaking() returns 1 when activated):
   norm sab
@@ -113,7 +100,6 @@ Execute (s.hasmatches()):
 
 Execute (autoloaded functions should exist):
   Assert exists("*sneak#label#to")
-  Assert exists("*sneak#hl#removehl")
   Assert exists("*sneak#search#new")
   Assert exists("*sneak#util#strlen")
 
@@ -696,6 +682,53 @@ Expect:
   ab7cdef FOOef ab1cdef ab2cdef
   ab1cdef FOOef ab5cdef ab6cdef
 
+###########################################################
+# Label-mode with exclusive (t-like) sneak
+
+Execute (mappings for exclusive streak mode):
+  nnoremap <silent> t :<c-u>call sneak#wrap('', 1, 0, 0, 2)<cr>
+  nnoremap <silent> T :<c-u>call sneak#wrap('', 1, 1, 0, 2)<cr>
+  onoremap <silent> t :<c-u>call sneak#wrap(v:operator, 1, 0, 0, 2)<cr>
+  onoremap <silent> T :<c-u>call sneak#wrap(v:operator, 1, 1, 0, 2)<cr>
+
+Do (label-mode, t-like sneak, forwards, normal [issue #176]):
+  tcsx
+Expect:
+  ab1cdef ab2cdef abcdef ab4cdef ab5cdef ab6cdef
+  ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
+  ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
+
+Do (label-mode, t-like sneak, backwards, normal [issue #176]):
+  $Tcfx
+Expect:
+  ab1cdef ab2cdef ab3cef ab4cdef ab5cdef ab6cdef
+  ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
+  ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
+
+Do (label-mode, t-like sneak, forwards, op-pending [issue #176]):
+  wwdtfs
+Expect:
+  ab1cdef ab2cdef f ab6cdef
+  ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
+  ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
+
+Do (label-mode, t-like sneak, backwards, op-pending [issue #176]):
+  5wcTb;X
+Expect:
+  ab1cdef ab2cdef ab3cdef abXab6cdef
+  ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
+  ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
+
+Execute (cleanup):
+  silent! unmap f
+  silent! unmap F
+  silent! unmap t
+  silent! unmap T
+  silent! xunmap f
+  silent! xunmap F
+  silent! xunmap t
+  silent! xunmap T
+
 Given:
   A11111111111111111111111111111111111111111111111111111K
   B22222222222222222222222222222222222222222222222222222L
@@ -913,9 +946,9 @@ Expect:
   foo æfïïooæ ïoòôõïo ïïofoo fïxïooïo
 
 ###########################################################
-# test language keymap
+# 'keymap'
 
-Execute (activate language keymap):
+Execute (SETUP):
   set keymap=bulgarian-phonetic
 
 Given:
@@ -932,17 +965,37 @@ Expect:
   абцдё еёееёП ЯВЕРПО
   абцдёё еёееёП ЯВЕРПО
 
-Do (repeat search for multi-keymap):
+Do:
   se::e::;x
-Expect:
+Expect (repeat search for multi-keymap):
   abcdef abcdef abcdef
   абцдеф АБЦДЕФ абцдеф
   абцдёё еёееёП ЯВЕРПО
   абцдё еёееёП ЯВЕРПО
 
-Execute (deactivate language keymap):
+Execute (SETUP):
+  let g:sneak#target_labels = 'адсфгхйкл;'
+  let g:sneak#label = 1
+  call sneak#init()
+  call sneak#label#sanitize_target_labels()
+  Assert ';адсфгхйкл' ==# g:sneak#target_labels
+Given:
+  яверуипоо пасдфкййл;
+  яверуипоо пасдфкййл;
+  яверуипоо пасдфкййл;
+  яверуипоо пасдфкййл;
+  яверуипоо пасдфкййл;
+Do:
+  dzсдд
+Expect (keymap + label-mode + multibyte labels):
+  сдфкййл;
+  яверуипоо пасдфкййл;
+
+Execute (TEARDOWN):
   set iminsert=0
   set keymap=
+  let g:sneak#label = 0
+  call sneak#init()
 
 ###########################################################
 # Sneak_f and Sneak_t
@@ -1037,16 +1090,16 @@ Expect:
   ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
   ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
 
-Do (FIXME inclusive f-delete forward):
+Do:
   dvfe
-Expect:
+Expect (FIXME inclusive f-delete forward):
   ef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
   ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
   ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
 
-Do (FIXME inclusive t-delete forward):
+Do:
   dvte
-Expect:
+Expect (FIXME inclusive t-delete forward):
   def ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
   ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
   ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
@@ -1079,16 +1132,6 @@ Expect:
   ab7cdef ab8cdef ab9cdef ab0cdef ab1cdef ab2cdef
   ab1cdef ab2cdef ab3cdef ab4cdef ab5cdef ab6cdef
 
-Execute (cleanup):
-  silent! unmap f
-  silent! unmap F
-  silent! unmap t
-  silent! unmap T
-  silent! xunmap f
-  silent! xunmap F
-  silent! xunmap t
-  silent! xunmap T
-
 ###########################################################
 # test sneak mapped to 'f' (instead of default 's')
 
@@ -1104,7 +1147,7 @@ Given:
   abcdef abcdef abcdef
 
 # issue #35
-Do (sneak 'f', then Vim default 't', then sneak 'f'):
+Do (sneak f, then Vim default t, then sneak f):
   fderxtcrx
   :\<C-U>doautocmd CursorMoved\<CR>
   :\<C-U>doautocmd CursorMoved\<CR>

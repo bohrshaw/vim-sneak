@@ -1,4 +1,4 @@
-sneak.vim :shoe:
+sneak.vim 👟
 ================
 
 Jump to any location specified by two characters.
@@ -48,8 +48,8 @@ via `z` (because `s` is taken by surround.vim).
     * Type `2.` to repeat twice.
     * Type `d;` to delete up to the next match.
     * Type `4d;` to delete up to the *fourth* next match.
-* Type `ysz))]` to surround in brackets up to `))`.
-    * Type `;` to go to the next `))`.
+* Type `yszxy]` to [surround] in brackets up to `xy`.
+    * Type `.` to repeat the surround operation.
 * Type `gUz\}` to upper-case the text from the cursor until the next instance
   of the literal text `\}`
     * Type `.` to repeat the `gUz\}` operation.
@@ -70,7 +70,7 @@ To repeat Sneak *operations* (like `dzab`) with dot `.`,
 FAQ
 ---
 
-#### Why not use `/`?
+### Why not use `/`?
 
 For the same reason that Vim has [motions](http://vimdoc.sourceforge.net/htmldoc/motion.html#left-right-motions)
 like `f` and `t`: common operations should use the fewest keystrokes.
@@ -84,25 +84,25 @@ like `f` and `t`: common operations should use the fewest keystrokes.
     ([#183](https://github.com/justinmk/vim-sneak/issues/183))
 * Smarter, subtler highlighting
 
-#### Why not use `f`?
+### Why not use `f`?
 
 * 50x more precise than `f` or `t`
 * Moves vertically
 * Highlights matches in the direction of your search
 
-#### How dare you remap `s`?
+### How dare you remap `s`?
 
 You can specify any mapping for Sneak (see [`:help sneak`](doc/sneak.txt)).
 By the way: `cl` is equivalent to `s`, and `cc` is equivalent to `S`.
 
-#### How can I replace `f` with Sneak?
+### How can I replace `f` with Sneak?
 
 ```vim
 map f <Plug>Sneak_s
 map F <Plug>Sneak_S
 ```
 
-#### How can I replace `f` and/or `t` with *one-character* Sneak?
+### How can I replace `f` and/or `t` with *one-character* Sneak?
 
 Sneak has `<Plug>` mappings for `f` and `t` 1-character-sneak.
 These mappings do *not* invoke label-mode, even if you have it enabled.
