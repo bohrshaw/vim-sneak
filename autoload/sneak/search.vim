@@ -41,9 +41,8 @@ func! sneak#search#new() abort
     return '\%>'.(wincol_lhs).'v'.'\%<'.(wincol_rhs+1).'v'
   endf
 
-  let g:sneak#oneline = 0
-  func! s.get_stopline() abort
-    return g:sneak#oneline ? line('.') : self._reverse ? line("w0") : line("w$")
+  func! s.get_stopline()
+    return self._reverse ? line("w0") : line("w$")
   endf
 
   " returns 1 if there are n _on-screen_ matches in the search direction.
