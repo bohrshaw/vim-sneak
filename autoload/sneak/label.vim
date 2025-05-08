@@ -112,7 +112,7 @@ func! s:do_label(s, v, reverse, label) abort "{{{
       call cursor(overflow[0], overflow[1])
     endif  " ...else we just switched directions, do not overflow.
   elseif choice == "\<Esc>"
-    call feedkeys("\<C-o>")
+    normal! `z
     return ''
   elseif (strlen(g:sneak_opt.label_esc) && choice ==# g:sneak_opt.label_esc)
         \ || -1 != index(["\<Esc>", "\<C-c>"], choice)

@@ -78,6 +78,10 @@ endf
 " input:      may be shorter than inputlen if the user pressed <enter> at the prompt.
 " inclusive:  0: t-like, 1: f-like, 2: /-like
 func! sneak#to(op, input, inputlen, count, register, repeatmotion, reverse, inclusive, label) abort "{{{
+  " Mark the current cursor position to be able to jump back to it when the user
+  " cancels the jump.
+  normal! mz
+
   if empty(a:input) "user canceled
     if a:op ==# 'c'  " user <esc> during change-operation should return to previous mode.
       call feedkeys((col('.') > 1 && col('.') < col('$') ? "\<RIGHT>" : '') . "\<C-\>\<C-G>", 'n')
